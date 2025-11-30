@@ -1,0 +1,7 @@
+body {
+  margin: 0;
+  background: radial-gradient(circle at 30% 20%, #c8fff1 0%, #8fd4c9 25%, #6aa39b 45%, #3b4c52 70%, #0a0f13 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: "IBM Plex Mono", monospace;
+}
