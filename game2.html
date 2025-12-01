@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Game 2 – Isla’s Robo Crossword</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+:root {
+  --mint: #338271;
+  --text: #173e32;
+}
+
+/* Same background vibe as index */
+body {
+  margin: 0;
+  background-image: url("images/ -8.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-family: "IBM Plex Mono", monospace;
+  color: #2d6659; /* mint text */
+  padding: 32px;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+/* NAV (reuse from index) */
+.nav {
+  position: absolute;
+  top: 18px;
+  right: 18px;           
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  border: 1px solid rgba(255,255,255,0.45);
+  backdrop-filter: blur(18px);
+  color: #206b59ee;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-family: "IBM Plex Mono", monospace;
+  transition: 0.25s ease;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.15);
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.30);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(0,0,0,0.25);
+}
+
+
+.game-wrapper {
+  max-width: 1100px;
+  margin: 90px auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr);
+  gap: 40px;
+  align-items: start;
+}
+
+/* Glass cards */
+.card {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 22px 22px 24px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+}
+
+/* Left: clues */
+h1 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+}
+
+.clues {
+  margin-top: 16px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.clues strong {
+  color: var(--mint);
+}
+
+/* Right: crossword grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 36px);
+  grid-template-rows: repeat(7, 36px);
+  gap: 4px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.cell {
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+/* Active letter cell */
+.cell input {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.5);
+  background: rgba(5,40,36,0.9);
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* Empty (no letter) */
+.cell.empty {
+  background: transparent;
+}
+
+/* Correct / wrong feedback */
+.cell.correct input {
+  background: #1f724a;
+  border-color: #b5f5e7;
+}
+
+.cell.wrong input {
+  background: #7b324a;
+  border-color: #ffb6c1;
+}
+
+/* Status + button */
+.controls {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.85rem;
+}
+
+button#check-btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15);
+  color: var(--mint);
+  font-family: "IBM Plex Mono", monospace;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button#check-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  body { padding: 20px; }
+
+  .game-wrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 90px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(7, 34px);
+    grid-template-rows: repeat(7, 34px);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <a class="nav-btn" href="index.html">Home</a>
+  <a class="nav-btn" href="game.html">Game 1</a>
+  <a class="nav-btn" href="game2.html">Game 2</a>
+</div>
+
+<div class="game-wrapper">
+
+  <!-- LEFT: CLUES -->
+  <div class="card">
+    <h1>Game 2 — Isla’s Robo Crossword</h1>
+    <p style="font-size:0.9rem;">
+      ✧✧✧✧✧Fill in the mini crossword..✧✧✧✧
+    </p>
+
+    <div class="clues">
+      <p><strong>1 across (row 1):</strong> Birthday girl✧</p>
+      <p><strong>2 across (row 3):</strong> Metal homie</p>
+      <p><strong>3 across (row 5):</strong> London slang for “this is acc so good”</p>
+      <p><strong>4 across (row 7):</strong> One joke isla says too much</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: GRID -->
+  <div class="card">
+    <div class="grid" id="crossword-grid">
+      <div class="cell"><input maxlength="1" data-answer="I"></div>
+      <div class="cell"><input maxlength="1" data-answer="S"></div>
+      <div class="cell"><input maxlength="1" data-answer="L"></div>
+      <div class="cell"><input maxlength="1" data-answer="A"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+      <!-- Row 2: all empty -->
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+      <!-- Row 3: R O B O T . . -->
+      <div class="cell"><input maxlength="1" data-answer="R"></div>
+      <div class="cell"><input maxlength="1" data-answer="O"></div>
+      <div class="cell"><input maxlength="1" data-answer="B"></div>
+      <div class="cell"><input maxlength="1" data-answer="O"></div>
+      <div class="cell"><input maxlength="1" data-answer="T"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+      <!-- Row 4: empty -->
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+      
+      <div class="cell"><input maxlength="1" data-answer="P"></div>
+      <div class="cell"><input maxlength="1" data-answer="E"></div>
+      <div class="cell"><input maxlength="1" data-answer="N"></div>
+      <div class="cell"><input maxlength="1" data-answer="G"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+
+
+      <div class="cell"><input maxlength="1" data-answer="W"></div>
+      <div class="cell"><input maxlength="1" data-answer="H"></div>
+      <div class="cell"><input maxlength="1" data-answer="E"></div>
+
+      <div class="cell"><input maxlength="1" data-answer="N"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell"><input maxlength="1" data-answer="D"></div>
+      <div class="cell"><input maxlength="1" data-answer="I"></div>
+      <div class="cell"><input maxlength="1" data-answer="D"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell"><input maxlength="1" data-answer="I"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell"><input maxlength="1" data-answer="A"></div>
+      <div class="cell"><input maxlength="1" data-answer="S"></div>
+      <div class="cell"><input maxlength="1" data-answer="K"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+      <div class="cell empty"></div>
+    </div>
+
+    <div class="controls">
+      <button id="check-btn">Check answers</button>
+      <span id="status-text">Type your answers, then hit “Check”.</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const inputs = document.querySelectorAll('#crossword-grid input');
+const statusText = document.getElementById('status-text');
+const checkBtn = document.getElementById('check-btn');
+
+inputs.forEach((inp) => {
+  inp.addEventListener('input', () => {
+    inp.value = inp.value.toUpperCase().slice(0, 1);
+    const next = inp.parentElement.nextElementSibling;
+    if (next && next.querySelector('input')) {
+      next.querySelector('input').focus();
+    }
+  });
+});
+
+checkBtn.addEventListener('click', () => {
+  let allFilled = true;
+  let allCorrect = true;
+
+  inputs.forEach((inp) => {
+    const cell = inp.parentElement;
+    const expected = (inp.dataset.answer || '').toUpperCase();
+    const value = (inp.value || '').toUpperCase();
+
+    cell.classList.remove('correct', 'wrong');
+
+    if (!value) {
+      allFilled = false;
+      allCorrect = false;
+      return;
+    }
+
+    if (value === expected) {
+      cell.classList.add('correct');
+    } else {
+      cell.classList.add('wrong');
+      allCorrect = false;
+    }
+  });
+
+  if (!allFilled) {
+    statusText.textContent = "Fill every letter first – no blank cells allowed ";
+  } else if (allCorrect) {
+    statusText.textContent = "All right, woop !!!✧";
+  } else {
+    statusText.textContent = "Some letters are off – tweak the slang / bots and try again.";
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Isla 21 — Mint Catch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+:root {
+  --mint: #b5f5e7;
+  --mint-soft: rgba(181,245,231,0.25);
+}
+
+/* FULL PAGE BACKGROUND */
+body {
+  margin: 0;
+  background-image: url("images/ -8.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--mint);
+  height: 100vh;
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* GAME CARD CENTERED */
+.game-shell {
+  position: relative;
+  width: 900px;
+  max-width: 95vw;
+  height: 520px;
+  max-height: 80vh;
+  border-radius: 28px;
+  background: radial-gradient(circle at top, #222 0%, #050506 60%, #000 100%);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+  overflow: hidden;
+  padding: 24px 28px 28px;
+  box-sizing: border-box;
+}
+
+/* TOP BAR: SCORE + LIVES */
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  opacity: 0.9;
+}
+
+.hud span {
+  color: var(--mint);
+}
+
+/* HEARTS */
+.hearts {
+  display: flex;
+  gap: 6px;
+}
+
+.heart {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--mint-soft);
+  box-shadow: 0 0 8px rgba(181,245,231,0.6);
+  background: radial-gradient(circle, #ff7f9b 0%, #7a1d38 70%);
+}
+
+.heart.lost {
+  background: rgba(80,80,80,0.9);
+  box-shadow: none;
+}
+
+/* CANVAS AREA */
+.game-frame {
+  margin-top: 14px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background: radial-gradient(circle at top, #111824 0%, #05070a 60%, #000 100%);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 360px;
+}
+
+/* OVERLAY TEXT (START/WIN/LOSE) */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.overlay h1 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mint);
+}
+
+.overlay p {
+  margin: 4px 0;
+  font-size: 0.85rem;
+  color: rgba(225,255,245,0.85);
+}
+
+.overlay .hint {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: rgba(210,255,245,0.7);
+}
+
+/* NAV BUTTON TOP-RIGHT (GAME 2) */
+.nav {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 50;
+}
+
+.nav a {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.65);
+  border: 1px solid rgba(181,245,231,0.6);
+  color: var(--mint);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.65);
+}
+
+.nav a:hover {
+  background: rgba(10,25,24,0.95);
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  body {
+    padding: 16px;
+  }
+
+  .game-shell {
+    padding: 18px 18px 22px;
+    height: auto;
+  }
+
+  canvas {
+    height: 320px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+  <a href="game2.html">Game 2</a>
+</div>
+
+<div class="game-shell">
+  <div class="hud">
+    <span id="score-text">SCORE: 0 / 21</span>
+    <div class="hearts">
+        <div class="heart" id="heart-1"></div>
+        <div class="heart" id="heart-2"></div>
+        <div class="heart" id="heart-3"></div>
+        <div class="heart" id="heart-4"></div>
+        <div class="heart" id="heart-5"></div>
+    </div>
+
+  </div>
+
+  <div class="game-frame">
+    <canvas id="gameCanvas" width="840" height="360"></canvas>
+
+    <div class="overlay" id="overlay">
+      <h1>Mint Catch // Isla 21</h1>
+      <p>Move left/right and catch the falling mint orbs.</p>
+      <p>Get <strong>21</strong> points to win.</p>
+      <p>You have <strong>3 hearts</strong>. Miss three and it’s over.</p>
+      <p class="hint">Use ◀ ▶ or A / D to move · Press Space to start</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const overlay = document.getElementById("overlay");
+const scoreText = document.getElementById("score-text");
+// let lives = 5;
+const hearts = [
+  document.getElementById("heart-1"),
+  document.getElementById("heart-2"),
+  document.getElementById("heart-3"),
+  document.getElementById("heart-4"),
+  document.getElementById("heart-5")
+];
+
+
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+
+// Player settings
+const player = {
+  x: WIDTH / 2 - 30,
+  y: HEIGHT - 40,
+  width: 60,
+  height: 16,
+  speed: 4,  // not too fast
+  moveLeft: false,
+  moveRight: false
+};
+
+
+let orbs = [];
+const orbRadius = 10;
+let orbSpawnTimer = 0;
+const ORB_SPAWN_INTERVAL = 60;  
+const ORB_MIN_SPEED = 1.3;
+const ORB_MAX_SPEED = 2.2;
+
+let score = 0;
+let lives = 3;
+let state = "start"; 
+
+function resetGame() {
+  score = 0;
+  lives = 3;
+  orbs = [];
+  player.x = WIDTH / 2 - player.width / 2;
+  state = "start";
+  scoreText.textContent = `SCORE: ${score} / 21`;
+  hearts.forEach(h => h.classList.remove("lost"));
+  overlay.style.display = "flex";
+  overlay.innerHTML = `
+    <h1>Mint Catch // Isla 21</h1>
+    <p>Move left/right and catch the falling mint orbs.</p>
+    <p>Get <strong>21</strong> points to win.</p>
+    <p>You have <strong>3 hearts</strong>. Miss three and it’s over.</p>
+    <p class="hint">Use ◀ ▶ or A / D to move · Press Space to start</p>
+  `;
+}
+
+function spawnOrb() {
+  const x = orbRadius + Math.random() * (WIDTH - orbRadius * 2);
+  const speed = ORB_MIN_SPEED + Math.random() * (ORB_MAX_SPEED - ORB_MIN_SPEED);
+  orbs.push({
+    x,
+    y: -orbRadius,
+    vy: speed
+  });
+}
+
+function update() {
+  if (state !== "playing") return;
+
+  // Move player
+  if (player.moveLeft) player.x -= player.speed;
+  if (player.moveRight) player.x += player.speed;
+  player.x = Math.max(0, Math.min(WIDTH - player.width, player.x));
+
+  // Spawn orbs easier & slower
+  orbSpawnTimer++;
+  if (orbSpawnTimer >= ORB_SPAWN_INTERVAL) {
+    spawnOrb();
+    orbSpawnTimer = 0;
+  }
+
+  // Update orbs
+  for (let i = orbs.length - 1; i >= 0; i--) {
+    const o = orbs[i];
+    o.y += o.vy;
+
+    // Check catch
+    const caught =
+      o.y + orbRadius >= player.y &&
+      o.y - orbRadius <= player.y + player.height &&
+      o.x + orbRadius >= player.x &&
+      o.x - orbRadius <= player.x + player.width;
+
+    if (caught) {
+      score++;
+      scoreText.textContent = `SCORE: ${score} / 21`;
+      orbs.splice(i, 1);
+      if (score >= 21) {
+        state = "won";
+        overlay.style.display = "flex";
+        overlay.innerHTML = `
+          <h1>woop woop ✧</h1>
+          <p>You caught ${score} orbs.</p>
+          <p class="hint">Press Space to play again.</p>
+        `;
+      }
+      continue;
+    }
+
+    // Missed
+    if (o.y - orbRadius > HEIGHT) {
+      orbs.splice(i, 1);
+      lives--;
+      if (lives >= 0 && lives < hearts.length) {
+        hearts[lives].classList.add("lost");
+      }
+      if (lives <= 0) {
+        state = "lost";
+        overlay.style.display = "flex";
+        overlay.innerHTML = `
+          <h1>Game over</h1>
+          <p>You ran out of hearts.</p>
+          <p class="hint">Press Space to try again.</p>
+        `;
+      }
+    }
+  }
+}
+
+function drawPlayer() {
+  ctx.save();
+  const grd = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
+  grd.addColorStop(0, "#0df2b6");
+  grd.addColorStop(1, "#58ffe3");
+  ctx.fillStyle = grd;
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+  ctx.restore();
+}
+
+function drawOrbs() {
+  ctx.save();
+  for (const o of orbs) {
+    const gradient = ctx.createRadialGradient(o.x, o.y, 2, o.x, o.y, orbRadius);
+    gradient.addColorStop(0, "#ffffff");
+    gradient.addColorStop(0.4, "#b5f5e7");
+    gradient.addColorStop(1, "#0b4035");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, orbRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function render() {
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+  // Subtle vignette
+  const g = ctx.createRadialGradient(
+    WIDTH / 2,
+    HEIGHT / 3,
+    40,
+    WIDTH / 2,
+    HEIGHT / 2,
+    WIDTH
+  );
+  g.addColorStop(0, "#05070a");
+  g.addColorStop(1, "#000000");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  drawPlayer();
+  drawOrbs();
+}
+
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// INPUT
+window.addEventListener("keydown", (e) => {
+  if (e.code === "ArrowLeft" || e.code === "KeyA") player.moveLeft = true;
+  if (e.code === "ArrowRight" || e.code === "KeyD") player.moveRight = true;
+
+  if (e.code === "Space") {
+    if (state === "start" || state === "won" || state === "lost") {
+      overlay.style.display = "none";
+      state = "playing";
+      if (state !== "playing" || score === 0 && lives === 3 && orbs.length === 0) {
+        resetGame();
+        overlay.style.display = "none";
+        state = "playing";
+      } else {
+        resetGame();
+        overlay.style.display = "none";
+        state = "playing";
+      }
+    }
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  if (e.code === "ArrowLeft" || e.code === "KeyA") player.moveLeft = false;
+  if (e.code === "ArrowRight" || e.code === "KeyD") player.moveRight = false;
+});
+
+// initialise HUD state
+resetGame();
+</script>
+
+</body>
+</html>
+
