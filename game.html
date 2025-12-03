@@ -11,7 +11,6 @@
   --mint-soft: rgba(181,245,231,0.25);
 }
 
-/* FULL PAGE BACKGROUND */
 body {
   margin: 0;
   background-image: url("images/ -8.jpg");
@@ -29,7 +28,7 @@ body {
   align-items: center;
 }
 
-/* GAME CARD CENTERED */
+
 .game-shell {
   position: relative;
   width: 900px;
@@ -44,7 +43,7 @@ body {
   box-sizing: border-box;
 }
 
-/* TOP BAR: SCORE + LIVES */
+
 .hud {
   display: flex;
   justify-content: space-between;
@@ -58,7 +57,7 @@ body {
   color: var(--mint);
 }
 
-/* HEARTS */
+
 .hearts {
   display: flex;
   gap: 6px;
@@ -78,7 +77,7 @@ body {
   box-shadow: none;
 }
 
-/* CANVAS AREA */
+
 .game-frame {
   margin-top: 14px;
   border-radius: 20px;
@@ -93,7 +92,7 @@ canvas {
   height: 360px;
 }
 
-/* OVERLAY TEXT (START/WIN/LOSE) */
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -126,7 +125,7 @@ canvas {
   color: rgba(210,255,245,0.7);
 }
 
-/* NAV BUTTON TOP-RIGHT (GAME 2) */
+
 .nav {
   position: fixed;
   top: 18px;
@@ -152,7 +151,7 @@ canvas {
   background: rgba(10,25,24,0.95);
 }
 
-/* MOBILE */
+
 @media (max-width: 900px) {
   body {
     padding: 16px;
@@ -221,13 +220,13 @@ const hearts = [
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
-// Player settings
+
 const player = {
   x: WIDTH / 2 - 30,
   y: HEIGHT - 40,
   width: 60,
   height: 16,
-  speed: 4,  // not too fast
+  speed: 1ß,  // not too fast
   moveLeft: false,
   moveRight: false
 };
